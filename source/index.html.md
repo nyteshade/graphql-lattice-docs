@@ -1,68 +1,35 @@
 ---
-title: API Reference
-
-language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
+title: API GQL Lattice
+language_tabs:
   - javascript
-
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/tripit/slate'>Documentation Powered by Slate</a>
-
+  - '<a href=''mailto:admin@graphql-lattice.com''>Contact Author</a>'
+  - '<a href=''https://github.com/tripit/slate''>Documentation Powered by Slate</a>'
 includes:
   - errors
-
 search: true
 ---
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the GraphQL Lattice API Docs!
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+We have language bindings in JavaScript. GraphQL Lattice is designed to work with NodeJS and Express 4.x. Although it may be made to work in more places later if there is sufficient demand.
 
-This example API documentation page was created with [Slate](https://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
+You can find more information about Lattice on the GraphQL Lattice [GraphQL Lattice](https://www.graphql-lattice.com) website.
 
-# Authentication
+# Importing Lattice
 
-> To authorize, use this code:
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
-```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
-```
+> First you'll need to fetch the classes themselves
 
 ```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
+const lattice = require('graphql-lattice');
 ```
 
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+All of these docs need to be written STAT!
 </aside>
 
 # Kittens
@@ -124,10 +91,10 @@ This endpoint retrieves all kittens.
 
 ### Query Parameters
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+Parameter    | Default | Description
+------------ | ------- | --------------------------------------------------------------------------------
+include_cats | false   | If set to true, the result will also include cats.
+available    | true    | If set to false, the result will include kittens that have already been adopted.
 
 <aside class="success">
 Remember — a happy kitten is an authenticated kitten!
@@ -184,8 +151,8 @@ This endpoint retrieves a specific kitten.
 ### URL Parameters
 
 Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
+--------- | --------------------------------
+ID        | The ID of the kitten to retrieve
 
 ## Delete a Specific Kitten
 
@@ -234,6 +201,5 @@ This endpoint retrieves a specific kitten.
 ### URL Parameters
 
 Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
-
+--------- | ------------------------------
+ID        | The ID of the kitten to delete
