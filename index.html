@@ -222,19 +222,19 @@
             <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
           </li>
           <li>
-            <a href="#importing-lattice" class="toc-h1 toc-link" data-title="Importing Lattice">Importing Lattice</a>
+            <a href="#attaching-to-express" class="toc-h1 toc-link" data-title="Attaching to Express">Attaching to Express</a>
           </li>
           <li>
-            <a href="#kittens" class="toc-h1 toc-link" data-title="Kittens">Kittens</a>
+            <a href="#creating-your-graphql-objects" class="toc-h1 toc-link" data-title="Creating your GraphQL Objects">Creating your GraphQL Objects</a>
+          </li>
+          <li>
+            <a href="#gqlexpressmiddleware" class="toc-h1 toc-link" data-title="GQLExpressMiddleware">GQLExpressMiddleware</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#get-all-kittens" class="toc-h2 toc-link" data-title="Kittens">Get All Kittens</a>
+                    <a href="#create-a-new-instance" class="toc-h2 toc-link" data-title="GQLExpressMiddleware">Create a new instance</a>
                   </li>
                   <li>
-                    <a href="#get-a-specific-kitten" class="toc-h2 toc-link" data-title="Kittens">Get a Specific Kitten</a>
-                  </li>
-                  <li>
-                    <a href="#delete-a-specific-kitten" class="toc-h2 toc-link" data-title="Kittens">Delete a Specific Kitten</a>
+                    <a href="#obtain-the-middleware-used-with-express" class="toc-h2 toc-link" data-title="GQLExpressMiddleware">Obtain the middleware used with Express</a>
                   </li>
               </ul>
           </li>
@@ -253,220 +253,109 @@
         <h1 id='introduction'>Introduction</h1>
 <p>Welcome to the GraphQL Lattice API Docs!</p>
 
-<p>We have language bindings in JavaScript. GraphQL Lattice is designed to work with NodeJS and Express 4.x. Although it may be made to work in more places later if there is sufficient demand.</p>
+<p>GraphQL Lattice is designed to work with NodeJS and Express 4.x. Although it may be made to work in more places later if there is sufficient demand.</p>
 
-<p>You can find more information about Lattice on the GraphQL Lattice <a href="https://www.graphql-lattice.com">GraphQL Lattice</a> website.</p>
-<h1 id='importing-lattice'>Importing Lattice</h1>
+<aside class="warning">Lattice is a work in progress and if you start to consume it now, you should be aware that it will likely change rapidly over the near future.</aside>
+<h1 id='attaching-to-express'>Attaching to Express</h1>
 <blockquote>
-<p>First you&#39;ll need to fetch the classes themselves</p>
+<p>When adding the endpoint, for now, you will need to import all the classes that extend <code>GQLBase</code> as well as <code>graphql-lattice</code> itself.</p>
+
+<p>A typical express route file looks like this</p>
 </blockquote>
-<pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">lattice</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'graphql-lattice'</span><span class="p">);</span>
-</code></pre>
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">Express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'express'</span><span class="p">)</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">GQLExpressMiddleware</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'graphql-lattice'</span><span class="p">)</span>
+<span class="kr">const</span> <span class="nx">SampleGQLBaseObj</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./graph/SampleGQLBaseObj'</span><span class="p">)</span>
 
-<aside class="notice">
-All of these docs need to be written STAT!
-</aside>
-<h1 id='kittens'>Kittens</h1><h2 id='get-all-kittens'>Get All Kittens</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<span class="c1">// Create an Express object to add to your app via app.use()</span>
+<span class="kr">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nx">Express</span><span class="p">();</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
+<span class="c1">// Instantiate a new instance of GQLExpressMiddleware. Currently it takes</span>
+<span class="c1">// the class objects you've defined that extend GQLBase. </span>
+<span class="c1">// NOTE That it does not take an instancce of these classes but the class </span>
+<span class="c1">// or function itself.</span>
+<span class="kr">const</span> <span class="nx">lattice</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GQLExpressMiddleware</span><span class="p">([</span>
+  <span class="nx">SampleGQLBaseObj</span>
+<span class="p">]);</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">kittens</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span class="p">();</span>
+<span class="c1">// Add the route using the simplest version</span>
+<span class="nx">router</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">middleware</span><span class="p">);</span>
 </code></pre>
 <blockquote>
-<p>The above command returns JSON structured like this:</p>
+<p>In the future a version or function on the middleware will allow you to simply specify a directory in your project&#39;s filesystem and any and all GQLBase extended exports will be read automatically once the server starts.</p>
 </blockquote>
-<pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fluffums"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calico"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre>
-<p>This endpoint retrieves all kittens.</p>
-<h3 id='http-request'>HTTP Request</h3>
-<p><code>GET http://example.com/api/kittens</code></p>
-<h3 id='query-parameters'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>include_cats</td>
-<td>false</td>
-<td>If set to true, the result will also include cats.</td>
-</tr>
-<tr>
-<td>available</td>
-<td>true</td>
-<td>If set to false, the result will include kittens that have already been adopted.</td>
-</tr>
-</tbody></table>
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-<h2 id='get-a-specific-kitten'>Get a Specific Kitten</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<p>You will likely be importing graphql-lattice in two types of places. The first will be wherever you are adding the express endpoint for graphql. The second place will be wherever you create your GraphQL objects.</p>
+<h1 id='creating-your-graphql-objects'>Creating your GraphQL Objects</h1>
+<blockquote>
+<p>When writing a class that extends GQLBase, you can do so like the following</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="p">{</span> <span class="nx">GQLBase</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'graphql-lattice'</span><span class="p">);</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
+<span class="kr">class</span> <span class="nx">SampleGQLBaseObj</span> <span class="kr">extends</span> <span class="nx">GQLBase</span> <span class="p">{</span>
+  <span class="c1">// Guts of the GQLBase extension class (see below)</span>
+<span class="p">}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">SampleGQLBaseObj</span><span class="p">;</span>
+</code></pre><h1 id='gqlexpressmiddleware'>GQLExpressMiddleware</h1><h2 id='create-a-new-instance'>Create a new instance</h2>
+<blockquote>
+<p>Create a new instance of GQLExpressMiddleware</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="p">{</span> <span class="nx">GQLExpressMiddleware</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'graphql-lattice'</span><span class="p">)</span>
 
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="c1">// Import/require all the GQLBase classes you've written</span>
+
+<span class="kr">const</span> <span class="nx">lattice</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GQLExpressMiddleware</span><span class="p">([</span>
+  <span class="c1">// Comma separate all the GQLBase'd classes that </span>
+  <span class="c1">// make up your graph.</span>
+<span class="p">]);</span>
+</code></pre>
+<p>A handler that exposes an express middleware function that mounts a GraphQL I/O endpoint. For now, takes an Array of classes extending from GQLBase. These are parsed and a combined schema of all their individual schemas is generated via the use of ASTs. This is passed off to express-graphql.</p>
+
+<p>As mentioned above, this approach is temporary and will quickly become a less desirable option once the module parser is complete. It will, however, remain for legacy and one-off usages</p>
+<h2 id='obtain-the-middleware-used-with-express'>Obtain the middleware used with Express</h2>
+<blockquote>
+<p>As of this writing, GQL Lattice supports a few different ways to obtain the Express compatible middleware.</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// The most common</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">middleware</span><span class="p">);</span>
 </code></pre>
 <blockquote>
-<p>The above command returns JSON structured like this:</p>
+<p>Some folks will want a version that doesn&#39;t mount the GraphiQL explorer on POST</p>
 </blockquote>
-<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-<p>This endpoint retrieves a specific kitten.</p>
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
-<h3 id='http-request-2'>HTTP Request</h3>
-<p><code>GET http://example.com/kittens/&lt;ID&gt;</code></p>
-<h3 id='url-parameters'>URL Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>ID</td>
-<td>The ID of the kitten to retrieve</td>
-</tr>
-</tbody></table>
-<h2 id='delete-a-specific-kitten'>Delete a Specific Kitten</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -X DELETE
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// The second most common. </span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">middleware</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">middlewareWithoutGraphiQL</span><span class="p">)</span>
 </code></pre>
 <blockquote>
-<p>The above command returns JSON structured like this:</p>
+<p>Alternatively, if there are specific <code>express-graphql</code> options you wish to submit, you can create a custom middleware</p>
 </blockquote>
-<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"deleted"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">":("</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-<p>This endpoint retrieves a specific kitten.</p>
-<h3 id='http-request-3'>HTTP Request</h3>
-<p><code>DELETE http://example.com/kittens/&lt;ID&gt;</code></p>
-<h3 id='url-parameters-2'>URL Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>ID</td>
-<td>The ID of the kitten to delete</td>
-</tr>
-</tbody></table>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// Rare</span>
+<span class="c1">// See https://github.com/graphql/express-graphql#options for more detail</span>
+<span class="kr">const</span> <span class="nx">opts</span> <span class="o">=</span> <span class="p">{</span> <span class="cm">/* graphqlHTTP options */</span> <span class="p">}</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">customMiddleware</span><span class="p">(</span><span class="nx">opts</span><span class="p">))</span>
+</code></pre>
+<blockquote>
+<p>Finally, if you need to programmatically do something specific with the options AFTER GraphQL Lattice is done with them, you can specify a function to do so</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// Almost never happens</span>
+<span class="c1">// See https://github.com/graphql/express-graphql#options for more detail</span>
+<span class="kr">const</span> <span class="nx">opts</span> <span class="o">=</span> <span class="p">{</span> <span class="cm">/* graphqlHTTP options */</span> <span class="p">}</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/graphql'</span><span class="p">,</span> <span class="nx">lattice</span><span class="p">.</span><span class="nx">customMiddleware</span><span class="p">(</span><span class="nx">opts</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// do something to the completed opts object</span>
+  <span class="c1">// THEN return it when you're done making changes</span>
+  <span class="k">return</span> <span class="nx">opts</span><span class="p">;</span>
+<span class="p">}));</span>
+</code></pre><h3 id='middleware-getter'>middleware (getter)</h3>
+<p>This is by far the most common. It is identical to calling <code>customMiddleware({graphiql: true})</code></p>
+<h3 id='middlewarewithoutgraphiql-getter'>middlewareWithoutGraphiQL (getter)</h3>
+<p>This is used for those that wish to mount their <code>GET</code> and <code>POST</code> endpoints separately and do not want to allow the GraphiQL browser on POST.</p>
+<h3 id='custommiddleware'>customMiddleware</h3>
+<p>If your needs require you to specify different values to graphqlHTTP, part of the express-graphql package, you can use the customMiddleware function to do so.</p>
+
+<p>The first parameter is an object that should contain valid graphqlHTTP options. See <a href="https://github.com/graphql/express-graphql#options">https://github.com/graphql/express-graphql#options</a> for more details. Validation is NOT performed.</p>
+
+<p>The second parameter is a function that will be called after any options have been applied from the first parameter and the rest of the middleware has been performed. This, if not modified, will be the final options passed into graphqlHTTP. In your callback, it is expected that the supplied object is to be modified and THEN RETURNED. Whatever is returned will be used or passed on. If nothing is returned, the options supplied to the function will be used instead.</p>
 <h1 id='errors'>Errors</h1>
-<aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files...just save them to the `includes` folder and add them to the top of your `index.md`'s frontmatter. Files are included in the order listed.</aside>
-
-<p>The Kittn API uses the following error codes:</p>
-
-<table><thead>
-<tr>
-<th>Error Code</th>
-<th>Meaning</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>400</td>
-<td>Bad Request -- Your request sucks.</td>
-</tr>
-<tr>
-<td>401</td>
-<td>Unauthorized -- Your API key is wrong.</td>
-</tr>
-<tr>
-<td>403</td>
-<td>Forbidden -- The kitten requested is hidden for administrators only.</td>
-</tr>
-<tr>
-<td>404</td>
-<td>Not Found -- The specified kitten could not be found.</td>
-</tr>
-<tr>
-<td>405</td>
-<td>Method Not Allowed -- You tried to access a kitten with an invalid method.</td>
-</tr>
-<tr>
-<td>406</td>
-<td>Not Acceptable -- You requested a format that isn&#39;t json.</td>
-</tr>
-<tr>
-<td>410</td>
-<td>Gone -- The kitten requested has been removed from our servers.</td>
-</tr>
-<tr>
-<td>418</td>
-<td>I&#39;m a teapot.</td>
-</tr>
-<tr>
-<td>429</td>
-<td>Too Many Requests -- You&#39;re requesting too many kittens! Slow down!</td>
-</tr>
-<tr>
-<td>500</td>
-<td>Internal Server Error -- We had a problem with our server. Try again later.</td>
-</tr>
-<tr>
-<td>503</td>
-<td>Service Unavailable -- We&#39;re temporarily offline for maintenance. Please try again later.</td>
-</tr>
-</tbody></table>
-
       </div>
       <div class="dark-box">
           <div class="lang-selector">
