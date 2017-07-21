@@ -14,192 +14,126 @@ search: true
 
 Welcome to the GraphQL Lattice API Docs!
 
-We have language bindings in JavaScript. GraphQL Lattice is designed to work with NodeJS and Express 4.x. Although it may be made to work in more places later if there is sufficient demand.
+GraphQL Lattice is designed to work with NodeJS and Express 4.x. Although it may be made to work in more places later if there is sufficient demand.
 
-You can find more information about Lattice on the GraphQL Lattice [GraphQL Lattice](https://www.graphql-lattice.com) website.
+<aside class="warning">Lattice is a work in progress and if you start to consume it now, you should be aware that it will likely change rapidly over the near future.</aside>
 
-# Importing Lattice
+# Attaching to Express
 
-> First you'll need to fetch the classes themselves
+> When adding the endpoint, for now, you will need to import all the classes that extend `GQLBase` as well as `graphql-lattice` itself.
 
-```javascript
-const lattice = require('graphql-lattice');
-```
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-<aside class="notice">
-All of these docs need to be written STAT!
-</aside>
-
-# Kittens
-
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
-
-```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
+> A typical express route file looks like this
 
 ```javascript
-const kittn = require('kittn');
+const Express = require('express')
+const { GQLExpressMiddleware } = require('graphql-lattice')
+const SampleGQLBaseObj = require('./graph/SampleGQLBaseObj')
 
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+// Create an Express object to add to your app via app.use()
+const router = Express();
+
+// Instantiate a new instance of GQLExpressMiddleware. Currently it takes
+// the class objects you've defined that extend GQLBase. 
+// NOTE That it does not take an instancce of these classes but the class 
+// or function itself.
+const lattice = new GQLExpressMiddleware([
+  SampleGQLBaseObj
+]);
+
+// Add the route using the simplest version
+router.use('/graphql', lattice.middleware);
 ```
 
-> The above command returns JSON structured like this:
+> In the future a version or function on the middleware will allow you to simply specify a directory in your project's filesystem and any and all GQLBase extended exports will be read automatically once the server starts.
 
-```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
-```
+You will likely be importing graphql-lattice in two types of places. The first will be wherever you are adding the express endpoint for graphql. The second place will be wherever you create your GraphQL objects.
 
-This endpoint retrieves all kittens.
+# Creating your GraphQL Objects
 
-### HTTP Request
-
-`GET http://example.com/api/kittens`
-
-### Query Parameters
-
-Parameter    | Default | Description
------------- | ------- | --------------------------------------------------------------------------------
-include_cats | false   | If set to true, the result will also include cats.
-available    | true    | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
+> When writing a class that extends GQLBase, you can do so like the following
 
 ```javascript
-const kittn = require('kittn');
+const { GQLBase } = require('graphql-lattice');
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+class SampleGQLBaseObj extends GQLBase {
+  // Guts of the GQLBase extension class (see below)
 }
+
+module.exports = SampleGQLBaseObj;
 ```
 
-This endpoint retrieves a specific kitten.
+# GQLExpressMiddleware
 
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+## Create a new instance
 
-### HTTP Request
-
-`GET http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | --------------------------------
-ID        | The ID of the kitten to retrieve
-
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
-```
+> Create a new instance of GQLExpressMiddleware
 
 ```javascript
-const kittn = require('kittn');
+const { GQLExpressMiddleware } = require('graphql-lattice')
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
+// Import/require all the GQLBase classes you've written
+
+const lattice = new GQLExpressMiddleware([
+  // Comma separate all the GQLBase'd classes that 
+  // make up your graph.
+]);
 ```
 
-> The above command returns JSON structured like this:
+A handler that exposes an express middleware function that mounts a GraphQL I/O endpoint. For now, takes an Array of classes extending from GQLBase. These are parsed and a combined schema of all their individual schemas is generated via the use of ASTs. This is passed off to express-graphql.
 
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
+As mentioned above, this approach is temporary and will quickly become a less desirable option once the module parser is complete. It will, however, remain for legacy and one-off usages
+
+## Obtain the middleware used with Express
+
+> As of this writing, GQL Lattice supports a few different ways to obtain the Express compatible middleware.
+
+```javascript
+// The most common
+app.use('/graphql', lattice.middleware);
 ```
 
-This endpoint retrieves a specific kitten.
+> Some folks will want a version that doesn't mount the GraphiQL explorer on POST
 
-### HTTP Request
+```javascript
+// The second most common. 
+app.get('/graphql', lattice.middleware);
+app.post('/graphql', lattice.middlewareWithoutGraphiQL)
+```
 
-`DELETE http://example.com/kittens/<ID>`
+> Alternatively, if there are specific `express-graphql` options you wish to submit, you can create a custom middleware
 
-### URL Parameters
+```javascript
+// Rare
+// See https://github.com/graphql/express-graphql#options for more detail
+const opts = { /* graphqlHTTP options */ }
+app.use('/graphql', lattice.customMiddleware(opts))
+```
 
-Parameter | Description
---------- | ------------------------------
-ID        | The ID of the kitten to delete
+> Finally, if you need to programmatically do something specific with the options AFTER GraphQL Lattice is done with them, you can specify a function to do so
+
+```javascript
+// Almost never happens
+// See https://github.com/graphql/express-graphql#options for more detail
+const opts = { /* graphqlHTTP options */ }
+app.use('/graphql', lattice.customMiddleware(opts, function(opts) {
+  // do something to the completed opts object
+  // THEN return it when you're done making changes
+  return opts;
+}));
+```
+
+### middleware (getter)
+
+This is by far the most common. It is identical to calling `customMiddleware({graphiql: true})`
+
+### middlewareWithoutGraphiQL (getter)
+
+This is used for those that wish to mount their `GET` and `POST` endpoints separately and do not want to allow the GraphiQL browser on POST.
+
+### customMiddleware
+
+If your needs require you to specify different values to graphqlHTTP, part of the express-graphql package, you can use the customMiddleware function to do so.
+
+The first parameter is an object that should contain valid graphqlHTTP options. See <https://github.com/graphql/express-graphql#options> for more details. Validation is NOT performed.
+
+The second parameter is a function that will be called after any options have been applied from the first parameter and the rest of the middleware has been performed. This, if not modified, will be the final options passed into graphqlHTTP. In your callback, it is expected that the supplied object is to be modified and THEN RETURNED. Whatever is returned will be used or passed on. If nothing is returned, the options supplied to the function will be used instead.
