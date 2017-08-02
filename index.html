@@ -239,6 +239,17 @@
               </ul>
           </li>
           <li>
+            <a href="#gqlbase" class="toc-h1 toc-link" data-title="GQLBase">GQLBase</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#schemas" class="toc-h2 toc-link" data-title="GQLBase">Schemas</a>
+                  </li>
+                  <li>
+                    <a href="#resolvers" class="toc-h2 toc-link" data-title="GQLBase">Resolvers</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
             <a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a>
           </li>
       </div>
@@ -355,6 +366,86 @@
 <p>The first parameter is an object that should contain valid graphqlHTTP options. See <a href="https://github.com/graphql/express-graphql#options">https://github.com/graphql/express-graphql#options</a> for more details. Validation is NOT performed.</p>
 
 <p>The second parameter is a function that will be called after any options have been applied from the first parameter and the rest of the middleware has been performed. This, if not modified, will be the final options passed into graphqlHTTP. In your callback, it is expected that the supplied object is to be modified and THEN RETURNED. Whatever is returned will be used or passed on. If nothing is returned, the options supplied to the function will be used instead.</p>
+<h1 id='gqlbase'>GQLBase</h1>
+<blockquote>
+<p>All your base GraphQL object types should extend from GQLBase. It provides a lot of consistency and allows the type to be automatically added to the generated schema.</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">import</span> <span class="p">{</span> <span class="nx">GQLBase</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'graphql-lattice'</span>
+<span class="c1">// or</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">GQLBase</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'graphql-lattice'</span><span class="p">)</span>
+
+<span class="kr">export</span> <span class="k">default</span> <span class="kr">class</span> <span class="nx">YourGQLType</span> <span class="kr">extends</span> <span class="nx">GQLBase</span> <span class="p">{</span>
+  <span class="c1">// Class contents</span>
+<span class="p">}</span>
+
+<span class="c1">// Or alternatively you can use `module.exports = YourGQLType`</span>
+</code></pre>
+<p>The <code>GQLBase</code> class should be the root of your business logic&#39;s GraphQL Types if you wish them to be used with GraphQL Lattice. The base class offers us several small advantages that we can take advantage of.</p>
+
+<ul>
+<li>It has a built in mechanism, standardized, to store our data model after fetching from whichever data source it lives in.</li>
+<li>It provides us a couple consistent ways to store and present our GraphQL schema for our objects</li>
+<li>It provides us a way to either import or define our query resolvers and mutation resolvers specific to our type</li>
+</ul>
+<h3 id='schemas'>Schemas</h3>
+<blockquote>
+<p>Example showing a definition of a schema</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">import</span> <span class="p">{</span> <span class="nx">GQLBase</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'graphql-lattice'</span>
+
+<span class="kr">export</span> <span class="kr">class</span> <span class="nx">Sample</span> <span class="kr">extends</span> <span class="nx">GQLBase</span> <span class="p">{</span> 
+  <span class="kr">static</span> <span class="nx">get</span> <span class="nx">SCHEMA</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">return</span> <span class="s2">`
+      type Sample { 
+        id: ID! 
+        name: String 
+      }
+    `</span> 
+  <span class="p">}</span> 
+<span class="p">}</span>
+</code></pre>
+<p>Every GraphQL object definition needs some associated GraphQL schema code. Lattice suggests the usage of the GraphQL SDL Schema Language to build your schema up.</p>
+<h3 id='resolvers'>Resolvers</h3>
+<blockquote>
+<p>Handling basic query resolvers</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="kr">import</span> <span class="p">{</span> <span class="nx">GQLBase</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'graphql-lattice'</span>
+
+<span class="kr">export</span> <span class="kr">class</span> <span class="nx">Sample</span> <span class="kr">extends</span> <span class="nx">GQLBase</span> <span class="p">{</span>
+  <span class="kr">static</span> <span class="nx">get</span> <span class="nx">SCHEMA</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s2">`
+      type Sample {
+        id: ID!
+        name: String 
+      }
+
+      type Query {
+        exampleSample: Sample
+      }
+    `</span>
+  <span class="p">}</span>
+
+  <span class="kr">static</span> <span class="nx">async</span> <span class="nx">RESOLVERS</span><span class="p">({</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">gql</span><span class="p">})</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="na">exampleSample</span><span class="p">:</span> <span class="nx">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kr">const</span> <span class="nx">model</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">GetOurExampleModelData</span><span class="p">();</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nx">Sample</span><span class="p">(</span><span class="nx">model</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<blockquote>
+<p>Example using a getter/function/async function and differences between that and something returned in RESOLVERS()</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// a comment</span>
+</code></pre>
+<p>Typically when writing new GraphQL types using <code>GQLBase</code>, you will need to define a few things. One, you must define the schema for your type as well as any resolvers required for actions for your type. Resolvers are broken into two locations</p>
+
+<ol>
+<li>In the object returned by the static function <code>RESOLVERS()</code></li>
+<li>As a <code>getter</code>, <code>function</code> or <code>async function</code> on the GraphQL type class itself.</li>
+</ol>
 <h1 id='errors'>Errors</h1>
       </div>
       <div class="dark-box">
