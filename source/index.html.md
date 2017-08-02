@@ -137,3 +137,89 @@ If your needs require you to specify different values to graphqlHTTP, part of th
 The first parameter is an object that should contain valid graphqlHTTP options. See <https://github.com/graphql/express-graphql#options> for more details. Validation is NOT performed.
 
 The second parameter is a function that will be called after any options have been applied from the first parameter and the rest of the middleware has been performed. This, if not modified, will be the final options passed into graphqlHTTP. In your callback, it is expected that the supplied object is to be modified and THEN RETURNED. Whatever is returned will be used or passed on. If nothing is returned, the options supplied to the function will be used instead.
+
+# GQLBase
+
+> All your base GraphQL object types should extend from GQLBase. It provides a lot of consistency and allows the type to be automatically added to the generated schema.
+
+```javascript
+import { GQLBase } from 'graphql-lattice'
+// or
+const { GQLBase } = require('graphql-lattice')
+
+export default class YourGQLType extends GQLBase {
+  // Class contents
+}
+
+// Or alternatively you can use `module.exports = YourGQLType`
+```
+
+The `GQLBase` class should be the root of your business logic's GraphQL Types if you wish them to be used with GraphQL Lattice. The base class offers us several small advantages that we can take advantage of.
+
+- It has a built in mechanism, standardized, to store our data model after fetching from whichever data source it lives in.
+- It provides us a couple consistent ways to store and present our GraphQL schema for our objects
+- It provides us a way to either import or define our query resolvers and mutation resolvers specific to our type
+
+### Schemas
+
+> Example showing a definition of a schema
+
+```javascript
+import { GQLBase } from 'graphql-lattice'
+
+export class Sample extends GQLBase { 
+  static get SCHEMA() { 
+    return `
+      type Sample { 
+        id: ID! 
+        name: String 
+      }
+    ` 
+  } 
+}
+```
+
+Every GraphQL object definition needs some associated GraphQL schema code. Lattice suggests the usage of the GraphQL SDL Schema Language to build your schema up.
+
+### Resolvers
+
+> Handling basic query resolvers
+
+```javascript
+import { GQLBase } from 'graphql-lattice'
+
+export class Sample extends GQLBase {
+  static get SCHEMA() {
+    return `
+      type Sample {
+        id: ID!
+        name: String 
+      }
+
+      type Query {
+        exampleSample: Sample
+      }
+    `
+  }
+
+  static async RESOLVERS({req, res, gql}) {
+    return {
+      exampleSample: async () => {
+        const model = await GetOurExampleModelData();
+        return new Sample(model)
+      }
+    }
+  }
+}
+```
+
+> Example using a getter/function/async function and differences between that and something returned in RESOLVERS()
+
+```javascript
+// a comment
+```
+
+Typically when writing new GraphQL types using `GQLBase`, you will need to define a few things. One, you must define the schema for your type as well as any resolvers required for actions for your type. Resolvers are broken into two locations
+
+1. In the object returned by the static function `RESOLVERS()`
+2. As a `getter`, `function` or `async function` on the GraphQL type class itself.
